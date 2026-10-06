@@ -1,1 +1,72 @@
-[]
+[
+  {
+    "id": "bnb_customer_care",
+    "display_name": "Bharat National Bank – Customer Care",
+    "kind": "bank_official",
+    "role": "Bank official",
+    "org": "Bharat National Bank (BNB)",
+    "aliases": ["bharat national bank", "bnb", "sunita"],
+    "official_numbers_masked": ["1800-XXX-0000"],
+    "registered_device": false,
+    "callback_number": true,
+    "trusted_contact": false,
+    "second_approver": false,
+    "codeword": false
+  },
+  {
+    "id": "rakesh_md",
+    "display_name": "Rakesh Menon (MD, Kaveri Textiles)",
+    "kind": "executive",
+    "role": "MD",
+    "org": "Kaveri Textiles Pvt Ltd",
+    "aliases": ["rakesh", "rakesh sir", "md", "managing director"],
+    "official_numbers_masked": ["+91 98XXXX1100"],
+    "registered_device": true,
+    "callback_number": true,
+    "trusted_contact": false,
+    "second_approver": true,
+    "codeword": true
+  },
+  {
+    "id": "anil_cfo",
+    "display_name": "Anil Verma (CFO, Kaveri Textiles)",
+    "kind": "executive",
+    "role": "CFO",
+    "org": "Kaveri Textiles Pvt Ltd",
+    "aliases": ["anil", "cfo", "chief financial officer"],
+    "official_numbers_masked": ["+91 98XXXX2200"],
+    "registered_device": true,
+    "callback_number": true,
+    "trusted_contact": false,
+    "second_approver": true,
+    "codeword": true
+  },
+  {
+    "id": "suresh_ops",
+    "display_name": "Suresh Patil (Warehouse Manager, Kaveri Textiles)",
+    "kind": "executive",
+    "role": "Warehouse manager",
+    "org": "Kaveri Textiles Pvt Ltd",
+    "aliases": ["suresh", "warehouse manager"],
+    "official_numbers_masked": ["+91 98XXXX4400"],
+    "registered_device": true,
+    "callback_number": true,
+    "trusted_contact": false,
+    "second_approver": true,
+    "codeword": true
+  },
+  {
+    "id": "aarav_son",
+    "display_name": "Aarav (son of Ramesh)",
+    "kind": "family",
+    "role": "Son",
+    "org": null,
+    "aliases": ["aarav", "beta", "son"],
+    "official_numbers_masked": ["+91 98XXXX3300"],
+    "registered_device": false,
+    "callback_number": true,
+    "trusted_contact": true,
+    "second_approver": false,
+    "codeword": true
+  }
+]

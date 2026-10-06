@@ -1,0 +1,62 @@
+{
+  "id": "s2_cloned_bank_kyc",
+  "title": "Cloned BNB officer: KYC threat",
+  "persona": "Ramesh, 62, retail customer",
+  "description": "A cloned 'bank officer' voice calls over VoIP, threatens account closure and demands the OTP. Rule R1 fires regardless of what any detector says.",
+  "expected_tiers": [
+    "CRITICAL"
+  ],
+  "audio": "s2_cloned_bank_kyc.wav",
+  "tts_voice": "David",
+  "telephony": {
+    "band_limit_hz": 3400,
+    "noise_db": -38
+  },
+  "language": "hi",
+  "metadata": {
+    "caller_number_masked": "+91 7XXXX XX912",
+    "in_directory": false,
+    "directory_name": null,
+    "channel": "voip",
+    "started_at": "2026-10-06T14:05:00"
+  },
+  "context": {
+    "account_id": "RAM-0001",
+    "amount_inr": null,
+    "beneficiary_id": null,
+    "beneficiary_is_new": false,
+    "beneficiary_age_days": null,
+    "typical_amount_inr": 8000,
+    "activity_window": [
+      8,
+      22
+    ],
+    "recent_txn_count_1h": 0,
+    "payment_rail": null
+  },
+  "segments": [
+    {
+      "text": "Hello, main Bharat National Bank ke security department se bol raha hoon.",
+      "start": 0.0,
+      "end": 5.6
+    },
+    {
+      "text": "Aapka KYC expire ho gaya hai aur aapka account aaj band ho jayega.",
+      "start": 5.95,
+      "end": 11.56
+    },
+    {
+      "text": "Account bachane ke liye abhi turant apna OTP batao jo aapke phone par aaya hai.",
+      "start": 11.91,
+      "end": 18.24
+    },
+    {
+      "text": "Yeh baat kisi ko mat batana, warna account block ho jayega.",
+      "start": 18.59,
+      "end": 23.66
+    }
+  ],
+  "demo_verification": {
+    "customer_view": true
+  }
+}

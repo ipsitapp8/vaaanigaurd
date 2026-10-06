@@ -1,0 +1,64 @@
+{
+  "id": "s5_detector_evading_clone",
+  "title": "Detector-evading clone: calm 'CFO'",
+  "persona": "Priya, finance executive at Kaveri Textiles",
+  "description": "A high-quality, calm and polite clone. The voice detector alone would pass it. A 'CFO' from an unknown number asks for ₹6,20,000 (6.2× typical) to a 2-day-old beneficiary and says to skip the usual approval. Rule R2 fires without any help from the detector.",
+  "expected_tiers": [
+    "HIGH"
+  ],
+  "audio": "s5_detector_evading_clone.wav",
+  "tts_voice": "David",
+  "telephony": {
+    "band_limit_hz": 7000,
+    "noise_db": -50
+  },
+  "language": "en",
+  "metadata": {
+    "caller_number_masked": "+91 9XXXX XX615",
+    "in_directory": false,
+    "directory_name": null,
+    "channel": "pstn",
+    "started_at": "2026-10-06T15:05:00"
+  },
+  "context": {
+    "account_id": "KTX-0001",
+    "amount_inr": 620000,
+    "beneficiary_id": "new_vendor_y",
+    "beneficiary_is_new": true,
+    "beneficiary_age_days": 2,
+    "typical_amount_inr": 100000,
+    "activity_window": [
+      9,
+      19
+    ],
+    "recent_txn_count_1h": 0,
+    "payment_rail": "RTGS"
+  },
+  "segments": [
+    {
+      "text": "Good afternoon Priya, this is Anil from the finance office, the CFO.",
+      "start": 0.0,
+      "end": 5.64
+    },
+    {
+      "text": "I need you to release ₹6,20,000 to a new vendor today.",
+      "tts": "I need you to release six lakh twenty thousand rupees to a new vendor today.",
+      "start": 5.99,
+      "end": 10.94
+    },
+    {
+      "text": "Please skip the usual approval process this time, we are on a tight deadline.",
+      "start": 11.29,
+      "end": 16.79
+    },
+    {
+      "text": "I will share the account details over email.",
+      "start": 17.14,
+      "end": 20.38
+    }
+  ],
+  "demo_verification": {
+    "outcome": "fail",
+    "narrative": "Callback to the directory number: the CFO knows nothing about it -> blocked"
+  }
+}

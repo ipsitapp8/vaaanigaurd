@@ -1,0 +1,60 @@
+{
+  "id": "s1_legit_bank_call",
+  "title": "Legit BNB call",
+  "persona": "Ramesh, 62, retail customer",
+  "description": "A genuine Bharat National Bank officer calls from the bank's directory number about card delivery. No request is made. Nothing should interrupt the customer.",
+  "expected_tiers": [
+    "LOW"
+  ],
+  "audio": "s1_legit_bank_call.wav",
+  "tts_voice": "Zira",
+  "telephony": {
+    "band_limit_hz": 3400,
+    "noise_db": -45
+  },
+  "language": "hi",
+  "metadata": {
+    "caller_number_masked": "1800-XXX-0000",
+    "in_directory": true,
+    "directory_name": "Bharat National Bank – Customer Care",
+    "channel": "pstn",
+    "started_at": "2026-10-06T11:20:00"
+  },
+  "context": {
+    "account_id": "RAM-0001",
+    "amount_inr": null,
+    "beneficiary_id": null,
+    "beneficiary_is_new": false,
+    "beneficiary_age_days": null,
+    "typical_amount_inr": 8000,
+    "activity_window": [
+      8,
+      22
+    ],
+    "recent_txn_count_1h": 0,
+    "payment_rail": null
+  },
+  "segments": [
+    {
+      "text": "Namaste, main Bharat National Bank se Sunita bol rahi hoon.",
+      "start": 0.0,
+      "end": 5.16
+    },
+    {
+      "text": "Aapka naya debit card dispatch ho gaya hai.",
+      "start": 5.51,
+      "end": 8.82
+    },
+    {
+      "text": "Woh teen din mein aapke ghar pahunch jayega.",
+      "start": 9.17,
+      "end": 12.58
+    },
+    {
+      "text": "Is baare mein aapko koi action lene ki zaroorat nahi hai. Dhanyavaad.",
+      "start": 12.93,
+      "end": 18.98
+    }
+  ],
+  "demo_verification": null
+}

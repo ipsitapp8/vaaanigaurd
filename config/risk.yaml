@@ -34,14 +34,12 @@ rules:
     high_signal_min: 60  # exactly one signal at or above this...
     others_below: 30     # ...and every other available signal below this
     cap: 59
+    # R4 is skipped when R1 or R2 fired (strong, detector-independent rules)
   R5_low_coverage:
     coverage_below: 0.5
     score_min: 40
     min_tier: MEDIUM
     flag: "Insufficient evidence — verification recommended."
-
-# Section F: a voice score alone can never push risk above MEDIUM (enforced via R4 + this cap).
-voice_only_cap: 59
 
 # Section G: verification outcome adjustments
 verification:

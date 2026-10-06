@@ -57,6 +57,7 @@ class AuditEntry(SQLModel, table=True):
     actor: str
     action: str
     analysis_id: str | None = Field(default=None, index=True)
+    detail_json: str = "{}"  # non-sensitive event details (ids, tiers, outcomes); hashed into payload_hash
     payload_hash: str
     prev_hash: str
     entry_hash: str  # sha256(prev_hash + payload)

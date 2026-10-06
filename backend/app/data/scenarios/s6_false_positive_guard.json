@@ -1,0 +1,57 @@
+{
+  "id": "s6_false_positive_guard",
+  "title": "False-positive guard: noisy real manager",
+  "persona": "Priya, finance executive at Kaveri Textiles",
+  "description": "A real warehouse manager on a noisy 8 kHz line asks for a routine payment to a known vendor at a normal amount. Friction must stay minimal.",
+  "expected_tiers": [
+    "LOW",
+    "MEDIUM"
+  ],
+  "audio": "s6_false_positive_guard.wav",
+  "tts_voice": "David",
+  "telephony": {
+    "band_limit_hz": 3400,
+    "noise_db": -22
+  },
+  "language": "en",
+  "metadata": {
+    "caller_number_masked": "+91 98XXXX4400",
+    "in_directory": true,
+    "directory_name": "Suresh Patil (Warehouse Manager, Kaveri Textiles)",
+    "channel": "pstn",
+    "started_at": "2026-10-06T11:10:00"
+  },
+  "context": {
+    "account_id": "KTX-0001",
+    "amount_inr": 42000,
+    "beneficiary_id": "mehta_packaging",
+    "beneficiary_is_new": false,
+    "beneficiary_age_days": 400,
+    "typical_amount_inr": 40000,
+    "activity_window": [
+      9,
+      19
+    ],
+    "recent_txn_count_1h": 0,
+    "payment_rail": "NEFT"
+  },
+  "segments": [
+    {
+      "text": "Hi Priya, Suresh here from the warehouse.",
+      "start": 0.0,
+      "end": 3.46
+    },
+    {
+      "text": "The monthly packaging invoice from Mehta Packaging is due.",
+      "start": 3.81,
+      "end": 7.82
+    },
+    {
+      "text": "Please release ₹42,000 as usual through NEFT, same account as last month.",
+      "tts": "Please release forty two thousand rupees as usual through NEFT, same account as last month.",
+      "start": 8.17,
+      "end": 14.72
+    }
+  ],
+  "demo_verification": null
+}

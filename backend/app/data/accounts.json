@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "account_id": "KTX-0001",
+    "holder": "Kaveri Textiles Pvt Ltd (SYNTHETIC)",
+    "typical_amount_inr": 60000,
+    "median_90d_inr": 60000,
+    "activity_window": [9, 19],
+    "known_beneficiaries": ["mehta_packaging", "sri_dyes", "lakshmi_logistics"]
+  },
+  {
+    "account_id": "RAM-0001",
+    "holder": "Ramesh (SYNTHETIC retail customer)",
+    "typical_amount_inr": 8000,
+    "median_90d_inr": 8000,
+    "activity_window": [8, 22],
+    "known_beneficiaries": ["aarav_son_upi"]
+  }
+]

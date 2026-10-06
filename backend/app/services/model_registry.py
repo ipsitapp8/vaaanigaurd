@@ -1,19 +1,38 @@
 """Lazy model loading, timeouts and status reporting (SPEC sections K, R).
 
-Phase 1: no models exist yet, so every ML component reports `not_loaded`
-(or `fallback` when VG_FORCE_FALLBACK=1). Later phases register loaders here.
+Phase 2 registers the ASR model (faster-whisper, int8 CPU). Other ML components report `not_loaded`
+(or `fallback` under VG_FORCE_FALLBACK=1) until their phase. A failed load marks the component
+`unavailable` and never raises into the request path.
 """
+import logging
+import os
+import threading
+from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FutureTimeout
+from typing import Any, TypeVar
+
 from app.config import get_settings
 from app.db import db_ok
 from app.models.schemas import ComponentStatus, HealthComponents
 
+os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")  # Windows without developer mode
+log = logging.getLogger("vaaniguard.models")
+
 ML_COMPONENTS = ("asr", "deepfake_model", "speaker", "zero_shot")
+
+_lock = threading.Lock()
+_models: dict[str, Any] = {}
+_status: dict[str, ComponentStatus] = {}
+_pool = ThreadPoolExecutor(max_workers=6, thread_name_prefix="engine")
+
+T = TypeVar("T")
 
 
 def component_status(name: str) -> ComponentStatus:
     if get_settings().force_fallback:
         return "fallback"
-    return "not_loaded"
+    return _status.get(name, "not_loaded")
 
 
 def get_device() -> str:
@@ -25,3 +44,54 @@ def health_components() -> HealthComponents:
         **{n: component_status(n) for n in ML_COMPONENTS},
         db="loaded" if db_ok() else "unavailable",
     )
+
+
+def _load_asr():
+    from faster_whisper import WhisperModel  # noqa: PLC0415
+
+    return WhisperModel(get_settings().whisper_model, device="cpu", compute_type="int8")
+
+
+_LOADERS: dict[str, Callable[[], Any]] = {"asr": _load_asr}
+
+
+def get_model(name: str) -> Any | None:
+    """Return the loaded model, loading it on first use. None when forced to fallback or unavailable."""
+    if get_settings().force_fallback:
+        return None
+    with _lock:
+        if name in _models:
+            return _models[name]
+        if _status.get(name) == "unavailable" or name not in _LOADERS:
+            return None
+        try:
+            _models[name] = _LOADERS[name]()
+            _status[name] = "loaded"
+            log.info("model_loaded", extra={"fields": {"model": name}})
+        except Exception as exc:  # download failure, missing cache, etc.
+            _status[name] = "unavailable"
+            log.error("model_load_failed", extra={"fields": {"model": name, "type": type(exc).__name__}})
+            return None
+        return _models[name]
+
+
+def warmup() -> None:
+    """Load models in the background at startup so the first request is fast."""
+    for name in _LOADERS:
+        get_model(name)
+
+
+def start_warmup() -> threading.Thread:
+    t = threading.Thread(target=warmup, name="warmup", daemon=True)
+    t.start()
+    return t
+
+
+def run_with_timeout(fn: Callable[[], T], timeout_s: float, fallback: Callable[[], T]) -> tuple[T, bool]:
+    """Run fn in the engine pool. On timeout or error return (fallback(), False); else (result, True)."""
+    fut = _pool.submit(fn)
+    try:
+        return fut.result(timeout=timeout_s), True
+    except (FutureTimeout, Exception) as exc:
+        log.warning("engine_fallback", extra={"fields": {"type": type(exc).__name__}})
+        return fallback(), False

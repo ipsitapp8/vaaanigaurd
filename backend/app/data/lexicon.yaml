@@ -1,2 +1,144 @@
-# Weighted EN/Hindi/Hinglish lexicon (SPEC section L). Populated in Phase 2.
-categories: {}
+# Weighted EN / Hindi (Devanagari) / romanized Hinglish lexicon (SPEC section L).
+# Each category has a default per-hit `weight` in [0,1]. A pattern is either a regex string
+# or {p: regex, w: weight}. All patterns are case-insensitive. Devanagari patterns avoid \b
+# (word boundaries misbehave around combining marks).
+#
+# `credential` patterns are REQUEST patterns ("OTP batao", "tell me your PIN"); bare mentions of
+# OTP/PIN live in `credential_mention` and never trigger rule R1. Negated phrasings
+# ("never share your OTP") are filtered out in code.
+
+categories:
+  credential:
+    weight: 0.9
+    patterns:
+      - '\botp\b.{0,25}?\b(bata|batao|bataiye|batao|batana|bataye|bol|bolo|bhej|bhejo|share|de\s?do|dena|dijiye|do|sunao|kya|dalo|enter)'
+      - '\b(tell|give|share|send|read\s?out|provide|confirm|dictate)\b.{0,20}?\b(otp|pin|cvv|password|passcode)\b'
+      - '\b(upi\s*pin|atm\s*pin|cvv|card\s*number|password|net\s*banking\s*password)\b.{0,25}?\b(bata|batao|bataiye|bhej|share|de\s?do|dena|do|enter|tell|give|send)'
+      - '\botp\b.{0,40}?\b(aaya|aaye|received|came|mila)\b'
+      - '\b(verification|security)\s*code\b.{0,20}?\b(tell|share|give|read|bata|batao)'
+      - '\bcode\s*(bata|batao|bol|bolo)'
+      - 'ओटीपी.{0,25}?(बता|बताओ|बताइए|भेज|दे\s?दो|दीजिए|बोलो)'
+      - '(पिन|सीवीवी|पासवर्ड).{0,20}?(बता|बताओ|बताइए|भेज|दे\s?दो)'
+
+  credential_mention:
+    weight: 0.15
+    patterns:
+      - '\b(otp|pin|cvv|password)\b'
+      - 'ओटीपी'
+
+  account_threat:
+    weight: 0.6
+    patterns:
+      - '\baccount\b.{0,20}\b(block|blocked|band|freeze|frozen|suspend|suspended|deactivate)'
+      - '\bband\s+ho\s+(jayega|jaega|jayegi|jaegi|jaye)\b'
+      - '\bblock\s+ho\s+(jayega|jaega|jayegi|jaye)\b'
+      - '\bkyc\b.{0,20}\b(expire|expired|update|pending|verify|incomplete|band)'
+      - '\bdigital\s+arrest\b'
+      - '\b(fir|arrest\s+warrant|warrant)\b'
+      - '\blegal\s+action\b'
+      - '\bsim\b.{0,15}\b(block|band|deactivate)'
+      - '(खाता|अकाउंट).{0,15}(बंद|ब्लॉक)'
+      - '(बंद|ब्लॉक)\s*हो\s*जाएगा'
+
+  urgency:
+    weight: 0.5
+    patterns:
+      - '\b(abhi|turant|jaldi|foran|immediately|urgent|urgently|right\s+now|asap|at\s+once|quickly|hurry|aaj\s+hi|today\s+itself|same\s+day)\b'
+      - '\bwithin\s+\d+\s+(minutes?|mins?|hours?)\b'
+      - '\b\d+\s+(minute|min|minutes)\s+(mein|me|ke\s+andar)\b'
+      - {p: '\b(deadline|tight\s+deadline|time\s+nahi\s+hai|no\s+time)\b', w: 0.3}
+      - 'अभी|तुरंत|जल्दी|आज\s*ही'
+
+  authority:
+    weight: 0.1
+    patterns:
+      - {p: '\b(rbi|cbi|customs|police|income\s+tax|narcotics|cyber\s?(cell|crime)|trai|enforcement\s+directorate)\b', w: 0.3}
+      - '\b(bank\s+(manager|officer|official|executive)|security\s+department|fraud\s+department|customer\s+care)\b'
+      - '\b(cfo|md|ceo|managing\s+director|chief\s+financial\s+officer)\b'
+
+  secrecy:
+    weight: 0.6
+    patterns:
+      - '\bkisi\s*ko\b.{0,12}\b(mat|nahi|na|nahin)\s*(batana|bataiye|bolna|batayein|bata)'
+      - '\bmat\s+batana\b'
+      - "\\b(don'?t|do\\s+not|dont)\\s+(tell|inform|share\\s+with)\\s+(anyone|anybody|your\\s+family|the\\s+bank)"
+      - '\bkeep\s+(this|it)\s+(a\s+)?(secret|confidential|between\s+us)\b'
+      - '\bconfidential\b'
+      - '\b(chupana|chhupana|gupt)\b'
+      - 'किसी\s*को.{0,10}(मत|नहीं).{0,8}(बताना|बताइए)'
+
+  payment:
+    weight: 0.45
+    patterns:
+      - '\b(upi|gpay|google\s*pay|phonepe|paytm|bhim)\b'
+      - '\b(transfer|wire|neft|rtgs|imps)\b'
+      - '\bpaise\s*(bhejo|bhej\s*do|send|dalo)\b'
+      - '\bcollect\s+request\b'
+      - '\bscan\b.{0,12}\bqr\b'
+      - '\b(bhejo|bhej\s*do|bhej\s*dijiye|karo)\b.{0,15}\b(upi|gpay|paytm|phonepe)\b'
+      - '\b(release|make|do|process)\b.{0,12}\b(the\s+)?(payment|funds|transfer)\b'
+      - '\b(send|bhejo)\b.{0,15}(money|₹|rs\.?|rupees|rupaye|paise)'
+      - '\b(release|send|pay|transfer|remit)\b.{0,25}(₹|rs\.?\s*\d|rupees|lakh|hazaar|thousand|\d)'
+      - {p: '\b(payment|invoice|vendor|beneficiary)\b', w: 0.15}
+      - 'ट्रांसफर|पैसे\s*भेज'
+
+  remote_access:
+    weight: 0.9
+    patterns:
+      - '\b(anydesk|any\s+desk|teamviewer|team\s+viewer|quick\s?support|rustdesk|ultraviewer)\b'
+      - '\bscreen\s*shar'
+      - '\bremote\s+(access|desktop|control)\b'
+      - '\b(install|download)\s+(this|the|ek)?\s*(app|apk|application)\b'
+      - '\bapp\s+(install|download)\s+(kar|karo|kijiye)'
+
+  process_bypass:
+    weight: 0.6
+    patterns:
+      - '\bskip\b.{0,15}\b(approval|process|verification|checks?|formalities)\b'
+      - '\b(accounts?|finance|team|ca|audit)\s+ko\s+(mat|nahi)\s*(batana|batao|bolna|bataiye|batayein)'
+      - "\\b(don'?t|do\\s+not|dont)\\s+(loop\\s+in|involve|tell|inform)\\s+(accounts|finance|the\\s+team|audit)"
+      - '\bbypass\b'
+      - '\bapproval\b.{0,15}\b(baad\s+mein|later|ke\s+baad|after)\b'
+      - '\bwithout\b.{0,10}\b(approval|informing|telling)\b'
+      - '\bnaya\s+(account|beneficiary|vendor)\b'
+      - '\bnew\s+(account|beneficiary|bank\s+details|account\s+details)\b'
+      - {p: '\bnew\s+vendor\b', w: 0.3}
+      - '\bapproval\s+ki\s+zaroorat\s+nahi\b'
+
+  emotional_lever:
+    weight: 0.5
+    patterns:
+      - '\b(accident|hospital|arrested|emergency|icu|surgery|operation|kidnap\w*|jail|bimaar|admit)\b'
+      - '\bpolice\s+(ne\s+)?(pakad|station|hirasat)'
+      - 'एक्सीडेंट|अस्पताल|गिरफ्तार|हादसा'
+
+# Phrases that negate a credential request when found just before / inside the match.
+credential_negation: '(never|do\s+not|don''?t|dont|should\s+not|shouldn''?t|not)\s+(ever\s+)?(share|tell|give|disclose|reveal|provide|send|ask)|(kisi\s*ko|kabhi)\s*(bhi\s*)?(mat|na|nahi|nahin)\s*(batana|batayein|bataiye|share|dena|den|dijiye)|share\s*(mat|na|nahi)|कभी.{0,12}(न|मत|नहीं)'
+
+# How each category feeds each signal (multiplier on the category's diminishing-returns value).
+signals:
+  scam:
+    account_threat: 1.0
+    secrecy: 1.0
+    authority: 1.0
+    emotional_lever: 0.7
+    remote_access: 0.8
+    process_bypass: 0.7
+    credential: 0.8
+  urgency:
+    urgency: 1.0
+    secrecy: 0.5
+    emotional_lever: 0.5
+    account_threat: 0.5
+    authority: 0.4
+  financial:
+    payment: 1.0
+    credential: 1.0
+    remote_access: 0.9
+    process_bypass: 0.3
+  amount_found_value: 0.5   # extracting a rupee amount counts as a financial-request hit
+
+speech_rate:
+  baseline_words_per_sec: 3.2
+  bonus_per_wps: 12
+  max_bonus: 15

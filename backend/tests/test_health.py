@@ -1,40 +1,40 @@
-import pytest
-from fastapi.testclient import TestClient
-
 from app.config import get_settings
 
 
-@pytest.fixture
-def client(tmp_path, monkeypatch):
-    monkeypatch.setenv("VG_DATA_DIR", str(tmp_path))
-    get_settings.cache_clear()
-    import app.db as db
-
-    db._engine = None
-    from app.main import app
-
-    with TestClient(app) as c:
-        yield c
-    db._engine = None
-    get_settings.cache_clear()
-
-
-def test_health_reports_components_and_creates_db(client, tmp_path):
+def test_health_reports_db_and_creates_file(client, tmp_path):
     r = client.get("/api/health")
     assert r.status_code == 200
     body = r.json()
-    assert body["status"] == "ok"
+    assert body["status"] == "ok" and body["device"] == "cpu"
     assert body["components"]["db"] == "loaded"
-    assert body["components"]["asr"] == "not_loaded"
     assert (tmp_path / "vaaniguard.db").exists()
 
 
-def test_force_fallback_reported(client, monkeypatch):
-    monkeypatch.setenv("VG_FORCE_FALLBACK", "1")
-    get_settings.cache_clear()
+def test_force_fallback_marks_ml_components_fallback(client):
     body = client.get("/api/health").json()
-    assert body["components"]["deepfake_model"] == "fallback"
     assert body["force_fallback"] is True
+    for k in ("asr", "deepfake_model", "speaker", "zero_shot"):
+        assert body["components"][k] == "fallback"
+
+
+def test_ml_components_not_loaded_without_force_fallback(client, monkeypatch):
+    monkeypatch.setenv("VG_FORCE_FALLBACK", "0")
+    get_settings.cache_clear()
+    from app.services import model_registry
+
+    monkeypatch.setattr(model_registry, "_status", {})
+    body = client.get("/api/health").json()
+    assert body["force_fallback"] is False
+    assert body["components"]["asr"] == "not_loaded"
+
+
+def test_unavailable_asr_is_reported(client, monkeypatch):
+    monkeypatch.setenv("VG_FORCE_FALLBACK", "0")
+    get_settings.cache_clear()
+    from app.services import model_registry
+
+    monkeypatch.setattr(model_registry, "_status", {"asr": "unavailable"})
+    assert client.get("/api/health").json()["components"]["asr"] == "unavailable"
 
 
 def test_risk_config_loads():

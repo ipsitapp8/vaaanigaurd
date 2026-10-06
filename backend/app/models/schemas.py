@@ -122,6 +122,10 @@ class AnalysisResponse(BaseModel):
     latency_ms: dict[str, int]
     components: dict[str, ComponentInfo]
     is_synthetic: bool = True
+    # Extras for the UI call card and transaction bar (not in the spec list; additive)
+    claimed_identity: str | None = None
+    call_metadata: CallMetadata | None = None
+    transaction: TransactionContext | None = None
 
 
 class HealthComponents(BaseModel):

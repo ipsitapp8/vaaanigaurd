@@ -1,0 +1,65 @@
+{
+  "id": "s4_family_emergency",
+  "title": "Family emergency (Hinglish)",
+  "persona": "Ramesh, 62, retail customer",
+  "description": "A cloned 'son' calls late at night: accident, hospital, send ₹50,000 by GPay to a new UPI ID and don't tell mummy.",
+  "expected_tiers": [
+    "HIGH",
+    "CRITICAL"
+  ],
+  "audio": "s4_family_emergency.wav",
+  "tts_voice": "David",
+  "telephony": {
+    "band_limit_hz": 3400,
+    "noise_db": -36
+  },
+  "language": "hi",
+  "metadata": {
+    "caller_number_masked": "+91 6XXXX XX778",
+    "in_directory": false,
+    "directory_name": null,
+    "channel": "voip",
+    "started_at": "2026-10-06T23:40:00"
+  },
+  "context": {
+    "account_id": "RAM-0001",
+    "amount_inr": 50000,
+    "beneficiary_id": "unknown_upi_1",
+    "beneficiary_is_new": true,
+    "beneficiary_age_days": 0,
+    "typical_amount_inr": 8000,
+    "activity_window": [
+      8,
+      22
+    ],
+    "recent_txn_count_1h": 0,
+    "payment_rail": "UPI"
+  },
+  "segments": [
+    {
+      "text": "Papa, main Aarav bol raha hoon.",
+      "start": 0.0,
+      "end": 3.22
+    },
+    {
+      "text": "Papa accident ho gaya hai, main hospital mein hoon.",
+      "start": 3.57,
+      "end": 7.96
+    },
+    {
+      "text": "Turant ₹50,000 GPay karo is number pe, jaldi karo please.",
+      "tts": "Turant fifty thousand rupees GPay karo is number pe, jaldi karo please.",
+      "start": 8.31,
+      "end": 14.51
+    },
+    {
+      "text": "Mummy ko mat batana, woh ghabra jayengi.",
+      "start": 14.86,
+      "end": 18.62
+    }
+  ],
+  "demo_verification": {
+    "outcome": "fail",
+    "narrative": "Trusted-contact callback: son is safe at home -> blocked"
+  }
+}

@@ -2,16 +2,17 @@ import logging
 import uuid
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app import __version__
-from app.api import health
+from app.api import analyses, health
 from app.config import get_settings
 from app.db import init_db
 from app.logging_setup import request_id_var, setup_logging
+from app.services import model_registry
 
 log = logging.getLogger("vaaniguard")
 
@@ -20,6 +21,7 @@ log = logging.getLogger("vaaniguard")
 async def lifespan(_: FastAPI):
     setup_logging()
     init_db()
+    model_registry.start_warmup()
     log.info("startup")
     yield
 
@@ -52,6 +54,14 @@ async def validation_handler(_: Request, exc: RequestValidationError):
     return _error(422, "validation_error", "Invalid request.", f"{len(exc.errors())} field(s) failed validation.")
 
 
+@app.exception_handler(HTTPException)
+async def http_handler(_: Request, exc: HTTPException):
+    d = exc.detail
+    if isinstance(d, dict) and {"code", "message", "hint"} <= d.keys():
+        return _error(exc.status_code, d["code"], d["message"], d["hint"])
+    return _error(exc.status_code, "http_error", str(d), "Check the request and try again.")
+
+
 @app.exception_handler(Exception)
 async def unhandled_handler(_: Request, exc: Exception):
     log.error("unhandled_error", extra={"fields": {"type": type(exc).__name__}})
@@ -59,3 +69,4 @@ async def unhandled_handler(_: Request, exc: Exception):
 
 
 app.include_router(health.router, prefix="/api")
+app.include_router(analyses.router, prefix="/api")

@@ -119,6 +119,7 @@ export interface AuditEntry {
   actor: string
   action: string
   analysis_id: string | null
+  detail_json: string
   payload_hash: string
   prev_hash: string
   entry_hash: string // sha256(prev_hash + payload)
@@ -185,6 +186,10 @@ export interface AnalysisResponse {
   latency_ms: Record<string, number>
   components: Record<string, { source: SignalSource; note?: string }>
   is_synthetic: boolean
+  // Extras for the call card and transaction bar
+  claimed_identity: string | null
+  call_metadata: CallMetadata | null
+  transaction: TransactionContext | null
 }
 
 export interface ApiError {
