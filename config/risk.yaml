@@ -1,0 +1,52 @@
+# VaaniGuard risk fusion configuration (SPEC section F).
+# Tune weights only within +-0.05 of these values and log changes in DECISIONS.md.
+
+weights:
+  voice: 0.20       # V
+  scam: 0.15        # S
+  urgency: 0.10     # U
+  financial: 0.20   # F
+  context: 0.20     # C
+  identity: 0.15    # I
+
+# Inclusive lower bounds. LOW 0-29, MEDIUM 30-59, HIGH 60-79, CRITICAL 80-100.
+tiers:
+  LOW: 0
+  MEDIUM: 30
+  HIGH: 60
+  CRITICAL: 80
+
+rules:
+  R1_credential_request:
+    min_score: 85
+  R2_context_led:
+    financial_min: 60
+    context_min: 70
+    urgency_min: 50      # (U >= urgency_min OR I >= identity_min)
+    identity_min: 60
+    min_score: 70
+  R3_voice_plus_money:
+    voice_min: 70
+    voice_confidence_min: 0.5
+    financial_min: 60
+    bonus: 8
+  R4_single_signal_cap:
+    high_signal_min: 60  # exactly one signal at or above this...
+    others_below: 30     # ...and every other available signal below this
+    cap: 59
+  R5_low_coverage:
+    coverage_below: 0.5
+    score_min: 40
+    min_tier: MEDIUM
+    flag: "Insufficient evidence — verification recommended."
+
+# Section F: a voice score alone can never push risk above MEDIUM (enforced via R4 + this cap).
+voice_only_cap: 59
+
+# Section G: verification outcome adjustments
+verification:
+  pass_delta: -35
+  cooling_off_amount_inr: 100000
+
+# Section G: hardened-mode threshold jitter (points)
+hardened_jitter: 3

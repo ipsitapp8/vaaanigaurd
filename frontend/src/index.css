@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+@theme {
+  --color-tier-low: #10b981;
+  --color-tier-medium: #f59e0b;
+  --color-tier-high: #f97316;
+  --color-tier-critical: #ef4444;
+  --font-mono: ui-monospace, "JetBrains Mono", "Cascadia Mono", Consolas, monospace;
+}
+
+:root { color-scheme: dark; }
+body { @apply bg-slate-950 text-slate-200 antialiased; margin: 0; }
