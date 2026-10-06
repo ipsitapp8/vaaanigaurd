@@ -129,7 +129,12 @@ def run_pipeline(
     transcript_redacted = " ".join(s.text_redacted for s in segment_scores)
     lat["total"] = int((time.perf_counter() - t_start) * 1000)
 
-    voice_note = "Voice authenticity model not available; voice is excluded from scoring." if voice.confidence == 0 else None
+    if voice.confidence == 0:
+        voice_note = "Voice analysis unavailable; voice is excluded from scoring."
+    elif voice.source == "heuristic":
+        voice_note = "Deepfake model not loaded: acoustic heuristics only, low confidence."
+    else:
+        voice_note = "Deepfake model + acoustic heuristics. Not validated on Indian telephony audio."
     components = {
         "asr": ComponentInfo(source=asr_source, note=asr_note),  # type: ignore[arg-type]
         "voice": ComponentInfo(source=voice.source, note=voice_note),

@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     engine_timeout_s: float = 8.0
 
     whisper_model: str = "small"
+    # Engines run concurrently, so cap each one's threads to avoid CPU oversubscription
+    asr_threads: int = 8
+    torch_threads: int = 6
     audio_retention_hours: int = 24
 
     @property

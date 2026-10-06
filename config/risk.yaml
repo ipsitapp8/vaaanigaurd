@@ -48,3 +48,29 @@ verification:
 
 # Section G: hardened-mode threshold jitter (points)
 hardened_jitter: 3
+
+# Section F/L: voice authenticity engine. Heuristic thresholds are UNCALIBRATED starting points
+# (no labelled Indian telephony data); each maps a feature value to 0-100 linearly between
+# `ok` (score 0) and `bad` (score 100).
+voice:
+  model_id: MelodyMachine/Deepfake-audio-detection-V2
+  model_weight: 0.7
+  heuristic_weight: 0.3
+  window_s: 4.0
+  max_windows: 16
+  model_budget_s: 6.0          # stop scoring further windows after this much wall time
+  model_base_confidence: 0.75  # capped: the model is not validated on Indian telephony audio
+  heuristic_max_confidence: 0.4
+  quality:
+    short_duration_s: 3.0
+    short_duration_factor: 0.5
+    low_snr_db: 10.0
+    low_snr_factor: 0.6
+    telephony_bandwidth_hz: 4000
+    telephony_factor: 0.6
+  heuristics:
+    dynamic_range_db: {ok: 35.0, bad: 65.0}   # speech peak minus noise floor; unnaturally clean = high
+    pitch_std_semitones: {ok: 3.0, bad: 1.0}  # flat pitch = high
+    flatness_variance: {ok: 0.004, bad: 0.0005}
+    pauses_per_10s: {ok: 2.0, bad: 0.0}       # no breath/pause gaps = high
+    hf_energy_ratio: {ok: 0.01, bad: 0.0005}  # only for wideband audio

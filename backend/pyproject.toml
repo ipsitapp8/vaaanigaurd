@@ -16,6 +16,8 @@ dependencies = [
   "scipy>=1.17.1",
   "soundfile>=0.14.0",
   "faster-whisper>=1.2.1",
+  "torch>=2.4",
+  "transformers>=4.44",
 ]
 
 # Phase 3 adds librosa/transformers/resemblyzer.
@@ -29,3 +31,11 @@ pythonpath = ["."]
 
 [tool.setuptools.packages.find]
 include = ["app*"]
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true

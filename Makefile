@@ -1,4 +1,4 @@
-.PHONY: setup dev dev-backend dev-frontend test build
+.PHONY: setup dev dev-backend dev-frontend test build demo-check
 
 setup:
 	cd backend && uv sync --python 3.11 --extra dev
@@ -18,3 +18,6 @@ test:
 
 build:
 	cd frontend && npm run build
+
+demo-check:
+	cd backend && uv run python ../scripts/demo_check.py

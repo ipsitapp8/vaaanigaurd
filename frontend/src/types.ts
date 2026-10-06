@@ -190,6 +190,78 @@ export interface AnalysisResponse {
   claimed_identity: string | null
   call_metadata: CallMetadata | null
   transaction: TransactionContext | null
+  // Evidence and workflow state
+  status: AnalysisStatus
+  created_at: string | null
+  scenario_id: string | null
+  audio_sha256: string | null
+  analysis_sha256: string | null
+  audio_retained: boolean
+  audio_expires_at: string | null
+  verification_id: string | null
+  review_id: string | null
+}
+
+export interface AnalysisSummary {
+  id: string
+  created_at: string
+  scenario_id: string | null
+  score: number
+  tier: Tier
+  status: AnalysisStatus
+  coverage: number
+  purged: boolean
+}
+
+export interface VerificationStart {
+  verification_id: string
+  methods: VerificationMethod[]
+  reason: string
+  instructions: Record<string, string>
+  outcome: VerificationOutcome
+}
+
+export interface VerificationComplete {
+  outcome: 'pass' | 'fail' | 'no_response'
+  actor: string
+}
+
+export interface ReviewDecisionRequest {
+  decision: 'approve' | 'reject' | 'escalate'
+  note: string
+}
+
+export interface ReviewItemOut {
+  id: string
+  analysis_id: string
+  priority: number
+  decision: ReviewDecision
+  analyst_note: string | null
+  decided_at: string | null
+  score: number | null
+  tier: Tier | null
+  status: AnalysisStatus | null
+  claimed_identity: string | null
+  amount_inr: number | null
+  scenario_id: string | null
+}
+
+export interface AuditEntryOut {
+  seq: number
+  ts: string
+  actor: string
+  action: string
+  analysis_id: string | null
+  detail: Record<string, unknown>
+  payload_hash: string
+  prev_hash: string
+  entry_hash: string
+}
+
+export interface AuditVerifyResult {
+  valid: boolean
+  broken_at: number | null
+  entries: number
 }
 
 export interface ApiError {

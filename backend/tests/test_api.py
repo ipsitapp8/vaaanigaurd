@@ -51,12 +51,12 @@ def test_scenario_hits_expected_tier_in_fallback_mode(client, sid):
     assert abs(sum(body["contributions"].values()) - 100) < 1.0 or body["score"] == 0 or sum(body["contributions"].values()) == 0
 
 
-def test_voice_is_honestly_unavailable_in_phase_2(client):
+def test_voice_falls_back_to_low_confidence_heuristics(client):
     body = client.post("/api/scenarios/s3_cloned_md_vendor_transfer/run").json()
     voice = body["signals"][0]
-    assert voice["confidence"] == 0 and voice["source"] == "fallback"
-    assert body["coverage"] < 1.0
-    assert "not available" in body["components"]["voice"]["note"]
+    assert voice["source"] == "heuristic" and 0 < voice["confidence"] <= 0.4
+    assert any(e["kind"] == "voice_model_unavailable" for e in voice["evidence"])
+    assert "heuristics only" in body["components"]["voice"]["note"]
 
 
 def test_s2_triggers_r1_and_special_route(client):
@@ -83,7 +83,7 @@ def test_s5_detector_independent_r2(client):
     body = client.post("/api/scenarios/s5_detector_evading_clone/run").json()
     assert body["tier"] == "HIGH"
     assert "R2" in [r["id"] for r in body["rules_triggered"]]
-    assert body["signals"][0]["confidence"] == 0  # no voice evidence used at all
+    assert body["signals"][0]["confidence"] <= 0.4  # the detector contributes little; R2 decides
 
 
 def test_s6_low_friction(client):

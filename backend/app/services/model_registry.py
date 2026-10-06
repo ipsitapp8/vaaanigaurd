@@ -1,7 +1,7 @@
 """Lazy model loading, timeouts and status reporting (SPEC sections K, R).
 
-Phase 2 registers the ASR model (faster-whisper, int8 CPU). Other ML components report `not_loaded`
-(or `fallback` under VG_FORCE_FALLBACK=1) until their phase. A failed load marks the component
+Registered: ASR (faster-whisper, int8 CPU) and the deepfake model (wav2vec2, registered by voice_auth).
+Speaker and zero-shot report `not_loaded` (or `fallback` under VG_FORCE_FALLBACK=1) until built. A failed load marks the component
 `unavailable` and never raises into the request path.
 """
 import logging
@@ -49,10 +49,23 @@ def health_components() -> HealthComponents:
 def _load_asr():
     from faster_whisper import WhisperModel  # noqa: PLC0415
 
-    return WhisperModel(get_settings().whisper_model, device="cpu", compute_type="int8")
+    s = get_settings()
+    return WhisperModel(s.whisper_model, device="cpu", compute_type="int8", cpu_threads=s.asr_threads)
 
 
 _LOADERS: dict[str, Callable[[], Any]] = {"asr": _load_asr}
+
+
+def register_loader(name: str, loader: Callable[[], Any]) -> None:
+    """Engines register their lazy model loader at import time (e.g. deepfake_model)."""
+    _LOADERS[name] = loader
+
+
+def peek_model(name: str) -> Any | None:
+    """Return the model only if it is already loaded; never loads or waits (used on the request path)."""
+    if get_settings().force_fallback:
+        return None
+    return _models.get(name)
 
 
 def get_model(name: str) -> Any | None:

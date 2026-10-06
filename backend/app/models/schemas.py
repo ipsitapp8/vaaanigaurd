@@ -126,6 +126,78 @@ class AnalysisResponse(BaseModel):
     claimed_identity: str | None = None
     call_metadata: CallMetadata | None = None
     transaction: TransactionContext | None = None
+    # Evidence and workflow state (set when the analysis is persisted)
+    status: AnalysisStatus = "analyzed"
+    created_at: datetime | None = None
+    scenario_id: str | None = None
+    audio_sha256: str | None = None
+    analysis_sha256: str | None = None  # hash of the analysis as first produced; later re-scoring is in the audit chain
+    audio_retained: bool = False
+    audio_expires_at: datetime | None = None
+    verification_id: str | None = None
+    review_id: str | None = None
+
+
+class AnalysisSummary(BaseModel):
+    id: str
+    created_at: datetime
+    scenario_id: str | None
+    score: int
+    tier: Tier
+    status: AnalysisStatus
+    coverage: float
+    purged: bool = False
+
+
+class VerificationStart(BaseModel):
+    verification_id: str
+    methods: list[VerificationMethod]
+    reason: str
+    instructions: dict[str, str]
+    outcome: VerificationOutcome = "pending"
+
+
+class VerificationComplete(BaseModel):
+    outcome: Literal["pass", "fail", "no_response"]
+    actor: str = Field(min_length=1, max_length=64)
+
+
+class ReviewDecisionRequest(BaseModel):
+    decision: Literal["approve", "reject", "escalate"]
+    note: str = Field(min_length=1, max_length=2000)
+
+
+class ReviewItemOut(BaseModel):
+    id: str
+    analysis_id: str
+    priority: int
+    decision: ReviewDecisionValue
+    analyst_note: str | None = None
+    decided_at: datetime | None = None
+    score: int | None = None
+    tier: Tier | None = None
+    status: AnalysisStatus | None = None
+    claimed_identity: str | None = None
+    amount_inr: int | None = None
+    scenario_id: str | None = None
+
+
+class AuditEntryOut(BaseModel):
+    seq: int
+    ts: datetime
+    actor: str
+    action: str
+    analysis_id: str | None
+    detail: dict
+    payload_hash: str
+    prev_hash: str
+    entry_hash: str
+
+
+class AuditVerifyResult(BaseModel):
+    valid: bool
+    broken_at: int | None = None
+    entries: int
 
 
 class HealthComponents(BaseModel):
