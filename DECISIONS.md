@@ -62,3 +62,15 @@
 39. **DB failure:** if persistence throws, the analysis is still returned, kept in an in-memory dict, and `components.store` says so. Workflow endpoints (verification, review, audit) need the database and return an error then.
 40. **Circular import guard:** `evidence.build_report` imports `audit` lazily (audit imports evidence for hashing).
 41. **Not done yet (later phases):** demo-safe cached-results mode, hardened-mode jitter, speaker similarity, zero-shot, `make demo-check` green with real recordings.
+
+
+## Phase 4 decisions (2026-10-07)
+
+42. **Router and pages.** `react-router-dom` added with the first real pages: `/live` (Live Call Monitor) and `/analyses/:id` (Analysis Detail); `/` redirects to `/live`. The nav only lists pages that exist (Review, Audit, Privacy, Console arrive in Phase 5).
+43. **Scenario audio endpoint** `GET /api/scenarios/{id}/audio` serves the bundled synthetic clip so the monitor can play it; uploads are played from a browser object URL (never sent back).
+44. **Live sync model.** The whole analysis is computed server-side; the UI reveals segments by `audio.currentTime` (a segment appears when it starts). The Verification Panel mounts once the displayed tier reaches the analysis tier (or on end / "Skip to end", which exists because autoplay can be blocked and for rehearsal). A toast fires on each tier increase.
+45. **Verification panel outcomes are labelled simulated** and use the claimed identity ("Simulate: Rakesh Menon confirms / denies / no response"). The re-scored result shows old -> new score, tier and transaction state, and links to the evidence page.
+46. **Bug found in browser testing:** CSS grid columns defaulted to `min-width: auto`, so the Recharts `ResponsiveContainer` fed its own width back into the column and the tab froze. Fixed with `grid-cols-[repeat(3,minmax(0,1fr))]` and `min-w-0`.
+47. **Bug found in browser testing:** a `data/vaaniguard.db` created in Phase 1 lacked `auditentry.detail_json` (`create_all` never alters tables), so persistence silently fell back to memory. `init_db` now adds missing columns (test added). The in-memory fallback itself behaved as designed and was labelled in `components.store`.
+48. **Automation caveat:** the Chrome screenshot tool timed out while CSS animations were running (JS still responded); with animations disabled the same page screenshots fine. Not reproduced as a user-facing hang.
+49. **Not in this phase:** the Customer view, what-if panel and Console/KPI page; the audio element showed 0:00 in the automated browser, so real-time playback sync was verified only through "Skip to end" and the first segment, not by listening. Re-check on a normal browser before the demo.

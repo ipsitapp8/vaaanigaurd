@@ -204,3 +204,24 @@ def test_analysis_survives_database_failure(client, monkeypatch):
     a = run(client, S1)
     assert a["components"]["store"]["source"] == "fallback"
     assert client.get(f"/api/analyses/{a['id']}").status_code == 200  # served from the in-memory fallback
+
+
+def test_init_db_adds_columns_missing_from_an_older_database(tmp_path, monkeypatch):
+    import sqlite3
+
+    from app.config import get_settings
+
+    monkeypatch.setenv("VG_DATA_DIR", str(tmp_path))
+    get_settings.cache_clear()
+    import app.db as db
+
+    db._engine = None
+    con = sqlite3.connect(tmp_path / "vaaniguard.db")  # Phase 1 audit table: no detail_json
+    con.execute("CREATE TABLE auditentry (seq INTEGER PRIMARY KEY, ts TEXT, actor TEXT, action TEXT, analysis_id TEXT, payload_hash TEXT, prev_hash TEXT, entry_hash TEXT)")
+    con.commit()
+    con.close()
+    db.init_db()
+    cols = {r[1] for r in sqlite3.connect(tmp_path / "vaaniguard.db").execute("pragma table_info(auditentry)")}
+    assert "detail_json" in cols
+    db._engine = None
+    get_settings.cache_clear()

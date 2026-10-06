@@ -273,3 +273,9 @@ def test_request_id_header_and_cors_origin(client):
     assert r.headers["access-control-allow-origin"] == "http://localhost:5173"
     r2 = client.get("/api/health", headers={"Origin": "http://evil.example"})
     assert "access-control-allow-origin" not in r2.headers
+
+
+def test_scenario_audio_is_served(client):
+    r = client.get("/api/scenarios/s1_legit_bank_call/audio")
+    assert r.status_code == 200 and r.content[:4] == b"RIFF"
+    assert client.get("/api/scenarios/nope/audio").status_code == 404

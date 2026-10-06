@@ -3,7 +3,7 @@ import logging
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
-from fastapi.responses import HTMLResponse, Response
+from fastapi.responses import FileResponse, HTMLResponse, Response
 from pydantic import ValidationError
 from sqlmodel import Session
 
@@ -25,6 +25,15 @@ def api_error(status: int, code: str, message: str, hint: str) -> HTTPException:
 @router.get("/scenarios", response_model=list[scenarios.ScenarioSummary])
 def list_scenarios():
     return scenarios.summaries()
+
+
+@router.get("/scenarios/{scenario_id}/audio")
+def scenario_audio(scenario_id: str):
+    """Bundled (synthetic) demo audio, so the Live Monitor can play it in sync with the analysis."""
+    sc = scenarios.get_scenario(scenario_id)
+    if sc is None or not sc.audio_path.exists():
+        raise api_error(404, "scenario_audio_missing", "No audio for this scenario.", "GET /api/scenarios lists the available ids.")
+    return FileResponse(sc.audio_path, media_type="audio/wav")
 
 
 @router.post("/scenarios/{scenario_id}/run", response_model=AnalysisResponse)
