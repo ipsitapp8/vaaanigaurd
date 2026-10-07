@@ -8,7 +8,7 @@ Spec: docs/SPEC.md · Decisions: DECISIONS.md. Work one phase at a time.
 - [x] **Phase 3: Voice, persistence and workflow** — deepfake model (wav2vec2) + acoustic heuristics, thread caps/timeouts, DB persistence, verification endpoints + re-scoring, review queue API, audit/verify endpoints, evidence report (JSON/HTML), purge + tombstone, encrypted opt-in audio retention, privacy manifest, `make demo-check`; 211 tests
 - [x] **Phase 4: frontend pages** — Live Monitor (gauge, timeline, synced transcript, transaction bar, upload), Analysis Detail, Verification Panel wired to real endpoints; 213 tests
 - [x] **Phase 5: Console, Review Queue, Audit, Privacy; customer view, mic recording, stats and purge-all** — consented demo audio and a green real-model `make demo-check` are NOT done (needs team recordings; see DECISIONS #33, #55)
-- [ ] Phase 6: polish, README, rehearsal
+- [x] **Phase 6: README (architecture, scoring, scenarios, privacy, limitations, disclosure, production path)** — live rehearsal on real recordings and a backup screen video remain with the team
 
 ## Section D checklist
 
@@ -27,7 +27,7 @@ Spec: docs/SPEC.md · Decisions: DECISIONS.md. Work one phase at a time.
 - [ ] PII redaction [x], in-memory audio (no temp files) [x], hash-chained audit module [x]; SHA-256 evidence, persistence, purge endpoint [x]
 - [ ] Graceful fallbacks (section R): ASR/sidecar/partial analysis/timeouts/malformed audio [x]; detector-unavailable [x], DB fail [x], demo-safe cached mode [ ]
 - [x] pytest suite (fusion, rules, verification, redaction, lexicon, audit, engines, API): 211 tests, run under `VG_FORCE_FALLBACK=1`
-- [ ] README
+- [x] README
 
 ### SHOULD
 - [ ] Speaker consistency · [ ] zero-shot intent · [x] Customer view · [x] Evidence report export · [x] Mic recording · [ ] Docker
