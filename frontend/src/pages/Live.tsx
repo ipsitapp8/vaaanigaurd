@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { FastForward, Phone, Play, Upload } from 'lucide-react'
 import { api, ApiFailure, scenarioAudioUrl, type ScenarioSummary } from '../api'
+import { CustomerView } from '../components/CustomerView'
+import { Recorder } from '../components/Recorder'
 import { CategoryLegend, RiskGauge, RiskTimeline, Transcript } from '../components/RiskViz'
 import { TransactionState, VerificationPanel } from '../components/VerificationPanel'
 import type { AnalysisResponse, Tier, TransactionContext } from '../types'
@@ -61,6 +63,7 @@ export default function Live() {
   const [audioSrc, setAudioSrc] = useState<string | null>(null)
   const [time, setTime] = useState(0)
   const [ended, setEnded] = useState(false)
+  const [customer, setCustomer] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
 
   const [amount, setAmount] = useState('')
@@ -177,6 +180,7 @@ export default function Live() {
               <label className="text-sm"><span className="mb-1 block text-xs text-slate-500">Upload amount ₹ (optional)</span>
                 <input value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="numeric" placeholder="e.g. 250000" className="w-32 rounded-md border border-slate-600 bg-slate-900 px-2 py-1.5" /></label>
               <label className="flex items-center gap-1 pb-2 text-xs text-slate-400"><input type="checkbox" checked={newBeneficiary} onChange={(e) => setNewBeneficiary(e.target.checked)} /> new beneficiary</label>
+              <Recorder disabled={running} onRecorded={(f) => void onUpload(f)} />
               <label className={`${btn} cursor-pointer ${running ? 'pointer-events-none opacity-50' : ''}`}>
                 <Upload className="h-4 w-4" /> Upload audio
                 <input type="file" accept="audio/*,.wav,.mp3,.m4a" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void onUpload(f); e.target.value = '' }} />
@@ -220,7 +224,11 @@ export default function Live() {
               {analysis.reasons.length > 0 && reached && (
                 <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-300">{analysis.reasons.slice(0, 4).map((r, i) => <li key={i}>{r}</li>)}</ul>
               )}
-              <Link to={`/analyses/${analysis.id}`} className="mt-3 inline-block text-sm text-sky-300 hover:underline">Full breakdown, evidence and audit →</Link>
+              <div className="mt-3 flex flex-wrap items-center gap-4">
+                <Link to={`/analyses/${analysis.id}`} className="text-sm text-sky-300 hover:underline">Full breakdown, evidence and audit →</Link>
+                <label className="flex items-center gap-1.5 text-sm text-slate-400"><input type="checkbox" checked={customer} onChange={(e) => setCustomer(e.target.checked)} /> Customer view</label>
+              </div>
+              {customer && reached && <div className="mt-4"><CustomerView a={analysis} /></div>}
             </Card>
             {reached && analysis.tier !== 'LOW' && <VerificationPanel analysis={analysis} onUpdated={setAnalysis} />}
             {reached && analysis.tier === 'LOW' && !verified && <VerificationPanel analysis={analysis} onUpdated={setAnalysis} />}

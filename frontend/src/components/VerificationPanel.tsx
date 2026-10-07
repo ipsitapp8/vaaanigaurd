@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { CheckCircle2, ClipboardList, PhoneOff, ShieldAlert, XCircle } from 'lucide-react'
 import { api, ApiFailure } from '../api'
@@ -27,6 +27,7 @@ export function VerificationPanel({ analysis, onUpdated }: { analysis: AnalysisR
   const [start, setStart] = useState<VerificationStart | null>(null)
   const [error, setError] = useState<ApiFailure | null>(null)
   const [busy, setBusy] = useState(false)
+  const startedFor = useRef<string | null>(null) // StrictMode runs effects twice; start each analysis once
   const [scoreBefore, setScoreBefore] = useState<number | null>(null)
 
   const verified = analysis.rules_triggered.find((r) => r.id.startsWith('VERIFY_'))
@@ -39,8 +40,11 @@ export function VerificationPanel({ analysis, onUpdated }: { analysis: AnalysisR
   }, [analysis.id])
 
   useEffect(() => {
-    if (needed && !finalised && !verified) begin()
-  }, [needed, finalised, verified, begin])
+    if (needed && !finalised && !verified && startedFor.current !== analysis.id) {
+      startedFor.current = analysis.id
+      begin()
+    }
+  }, [needed, finalised, verified, begin, analysis.id])
 
   const complete = async (outcome: 'pass' | 'fail' | 'no_response') => {
     if (!start) return

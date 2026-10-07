@@ -1,7 +1,12 @@
 import type {
   AnalysisResponse,
+  AnalysisSummary,
   ApiError,
+  AuditEntryOut,
+  AuditVerifyResult,
   HealthResponse,
+  ReviewDecisionRequest,
+  ReviewItemOut,
   VerificationComplete,
   VerificationStart,
 } from './types'
@@ -13,6 +18,23 @@ export interface ScenarioSummary {
   description: string
   expected_tier: string
   duration_s: number
+}
+
+export interface Stats {
+  analyses_today: number
+  analyses_total: number
+  held_transactions: number
+  protected_inr: number
+  median_latency_ms: number | null
+  review_pending: number
+}
+
+export interface PrivacyManifest {
+  synthetic_data_notice: string
+  collected: { item: string; why: string; retention: string }[]
+  never_collected: string[]
+  purge: string
+  disclaimers: string[]
 }
 
 export class ApiFailure extends Error {
@@ -58,6 +80,17 @@ export const api = {
   scenarios: () => request<ScenarioSummary[]>('/scenarios'),
   runScenario: (id: string) => request<AnalysisResponse>(`/scenarios/${id}/run`, { method: 'POST' }),
   upload: (form: FormData) => request<AnalysisResponse>('/analyses', { method: 'POST', body: form }),
+  stats: () => request<Stats>('/stats'),
+  analyses: (limit = 20) => request<AnalysisSummary[]>(`/analyses?limit=${limit}`),
+  reviewQueue: (includeDecided = false) =>
+    request<ReviewItemOut[]>(`/review-queue?include_decided=${includeDecided}`),
+  reviewDecision: (id: string, body: ReviewDecisionRequest) =>
+    request<AnalysisResponse>(`/review/${id}/decision`, post(body)),
+  audit: (analysisId?: string) =>
+    request<AuditEntryOut[]>(`/audit?limit=300${analysisId ? `&analysis_id=${analysisId}` : ''}`),
+  auditVerify: () => request<AuditVerifyResult>('/audit/verify'),
+  manifest: () => request<PrivacyManifest>('/privacy/manifest'),
+  purgeAll: () => request<{ purged: number }>('/analyses', { method: 'DELETE' }),
   analysis: (id: string) => request<AnalysisResponse>(`/analyses/${id}`),
   purge: (id: string) => request<void>(`/analyses/${id}`, { method: 'DELETE' }),
   startVerification: (id: string) =>

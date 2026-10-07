@@ -74,3 +74,13 @@
 47. **Bug found in browser testing:** a `data/vaaniguard.db` created in Phase 1 lacked `auditentry.detail_json` (`create_all` never alters tables), so persistence silently fell back to memory. `init_db` now adds missing columns (test added). The in-memory fallback itself behaved as designed and was labelled in `components.store`.
 48. **Automation caveat:** the Chrome screenshot tool timed out while CSS animations were running (JS still responded); with animations disabled the same page screenshots fine. Not reproduced as a user-facing hang.
 49. **Not in this phase:** the Customer view, what-if panel and Console/KPI page; the audio element showed 0:00 in the automated browser, so real-time playback sync was verified only through "Skip to end" and the first segment, not by listening. Re-check on a normal browser before the demo.
+
+
+## Phase 5 decisions (2026-10-07)
+
+50. **Pages added:** Console (`/`, KPIs from `GET /api/stats`), Review Queue (`/review`), Audit Log (`/audit`, "Verify chain integrity" button recomputes server-side), Privacy Center (`/privacy`, manifest table, purge-all via `DELETE /api/analyses`, each purge audited). All have skeleton, empty (with CTA) and error-with-retry states.
+51. **Demo role switch** (User / Analyst, header, labelled "demo only: production would use bank IAM/SSO + RBAC"). It is a UI gate only: the Review page disables decisions unless Analyst. The backend has no auth, by design (spec: no auth systems).
+52. **Console KPIs** use only persisted, non-purged analyses: "protected" is the sum of the amounts of blocked transactions (synthetic); "held" counts held, verifying and in_review. The review count excludes purged items.
+53. **SHOULD items done:** Customer view (English + Hindi alert card, 1930 line, bank-never-asks-OTP text for the special route), microphone recording (MediaRecorder -> normal upload path; button hidden if unsupported, message if denied), evidence report export (JSON + printable HTML, from Phase 3).
+54. **Double verification bug:** React StrictMode ran the panel's start effect twice and created two pending verifications for one analysis; the panel now starts once per analysis id.
+55. **Demo audio is still placeholder TTS.** I cannot record or clone consenting people's voices from here, so the consented-recording step is NOT done and `make demo-check` with real models still fails scenarios 3 and 4 (#33). Needed from the team: record genuine clips and generate clones with consent, write them to `demo_audio/` and `consent.md`, and re-run `make demo-check`. Not done: Dockerfile, README (Phase 6), demo-safe cached mode, hardened-mode jitter, speaker similarity, zero-shot.

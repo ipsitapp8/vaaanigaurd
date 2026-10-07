@@ -225,3 +225,17 @@ def test_init_db_adds_columns_missing_from_an_older_database(tmp_path, monkeypat
     assert "detail_json" in cols
     db._engine = None
     get_settings.cache_clear()
+
+
+def test_stats_and_purge_all(client):
+    a = run(client, S3)
+    v = client.post(f"/api/analyses/{a['id']}/verification").json()
+    client.post(f"/api/verifications/{v['verification_id']}/complete", json={"outcome": "fail", "actor": "x"})
+    run(client, S1)
+    st = client.get("/api/stats").json()
+    assert st["analyses_today"] == 2 and st["protected_inr"] == 480000
+    assert st["median_latency_ms"] is not None and st["review_pending"] == 1
+    assert client.delete("/api/analyses").json() == {"purged": 2}
+    st = client.get("/api/stats").json()
+    assert st["analyses_today"] == 0 and st["protected_inr"] == 0 and st["review_pending"] == 0
+    assert client.get("/api/audit/verify").json()["valid"] is True

@@ -278,3 +278,47 @@ def decide_review(session: Session, review_id: str, decision: str, note: str, ac
     _save(session, res)
     audit.append_entry(session, actor, f"review_{decision}", res.id, {"review_id": item.id, "note_length": len(note.strip())})
     return item, res
+
+
+# --- console stats and bulk purge ---
+
+
+def stats(session: Session) -> dict:
+    """KPIs for the console. Amounts are synthetic."""
+    import statistics  # noqa: PLC0415
+
+    rows = session.exec(select(Analysis)).all()
+    today = datetime.now(timezone.utc).date()
+    n_today, held, protected, latencies = 0, 0, 0, []
+    for r in rows:
+        expl = json.loads(r.explanation_json or "{}")
+        if expl.get("purged"):
+            continue
+        if retention.as_utc(r.created_at).date() == today:
+            n_today += 1
+        if r.status in ("held", "in_review", "verifying"):
+            held += 1
+        if r.status == "blocked":
+            protected += ((expl.get("transaction") or {}).get("amount_inr")) or 0
+        if (t := (expl.get("latency_ms") or {}).get("total")) is not None:
+            latencies.append(t)
+    return {
+        "analyses_today": n_today,
+        "analyses_total": len(rows),
+        "held_transactions": held,
+        "protected_inr": protected,
+        "median_latency_ms": int(statistics.median(latencies)) if latencies else None,
+        "review_pending": len(review_queue(session)),
+    }
+
+
+def purge_all(session: Session, actor: str = "user") -> int:
+    ids = [r.id for r in session.exec(select(Analysis)).all()]
+    count = 0
+    for i in ids:
+        row = session.get(Analysis, i)
+        if row and not json.loads(row.explanation_json or "{}").get("purged"):
+            purge(session, i, actor)
+            count += 1
+    _mem.clear()
+    return count

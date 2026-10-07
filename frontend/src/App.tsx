@@ -2,8 +2,13 @@ import { useCallback, useEffect, useState } from 'react'
 import { BrowserRouter, Navigate, NavLink, Route, Routes } from 'react-router-dom'
 import { RefreshCw, ShieldCheck } from 'lucide-react'
 import { api } from './api'
+import Audit from './pages/Audit'
+import Console from './pages/Console'
 import Detail from './pages/Detail'
 import Live from './pages/Live'
+import Privacy from './pages/Privacy'
+import Review from './pages/Review'
+import { RoleProvider, useRole } from './role'
 import type { ComponentStatus, HealthResponse } from './types'
 
 const PILL_LABELS: Record<keyof HealthResponse['components'], string> = {
@@ -32,6 +37,27 @@ function StatusPill({ label, status }: { label: string; status: ComponentStatus 
   )
 }
 
+const NAV: [string, string][] = [
+  ['/', 'Console'],
+  ['/live', 'Live Monitor'],
+  ['/review', 'Review Queue'],
+  ['/audit', 'Audit Log'],
+  ['/privacy', 'Privacy'],
+]
+
+function RoleSwitch() {
+  const { role, setRole } = useRole()
+  return (
+    <label className="flex items-center gap-1 text-xs text-slate-400" title="Demo only: production would use bank IAM/SSO + RBAC">
+      Role (demo only)
+      <select value={role} onChange={(e) => setRole(e.target.value as 'user' | 'analyst')} className="rounded border border-slate-600 bg-slate-900 px-1 py-0.5 text-slate-200">
+        <option value="user">User</option>
+        <option value="analyst">Analyst</option>
+      </select>
+    </label>
+  )
+}
+
 function Header() {
   const [health, setHealth] = useState<HealthResponse | null>(null)
   const [error, setError] = useState(false)
@@ -54,10 +80,12 @@ function Header() {
         <ShieldCheck className="h-5 w-5 text-emerald-400" />
         <span className="text-lg font-semibold tracking-tight text-slate-100">VaaniGuard</span>
       </div>
-      <nav className="flex gap-3 text-sm">
-        <NavLink to="/live" className={({ isActive }) => (isActive ? 'text-slate-100' : 'text-slate-400 hover:text-slate-200')}>
-          Live Monitor
-        </NavLink>
+      <nav className="flex gap-4 text-sm">
+        {NAV.map(([to, label]) => (
+          <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => (isActive ? 'text-slate-100' : 'text-slate-400 hover:text-slate-200')}>
+            {label}
+          </NavLink>
+        ))}
       </nav>
       <div className="ml-auto flex flex-wrap items-center gap-2">
         {health &&
@@ -72,6 +100,7 @@ function Header() {
             <RefreshCw className="h-3 w-3" /> Backend unreachable · retry
           </button>
         )}
+        <RoleSwitch />
         <span className="rounded border border-amber-500/50 bg-amber-500/10 px-2 py-0.5 font-mono text-xs font-semibold text-amber-300">
           SYNTHETIC DEMO DATA
         </span>
@@ -83,11 +112,15 @@ function Header() {
 export default function App() {
   return (
     <BrowserRouter>
+      <RoleProvider>
       <div className="min-h-screen bg-slate-950 pb-10">
         <Header />
         <main className="mx-auto max-w-7xl p-6">
           <Routes>
-            <Route path="/" element={<Navigate to="/live" replace />} />
+            <Route path="/" element={<Console />} />
+            <Route path="/review" element={<Review />} />
+            <Route path="/audit" element={<Audit />} />
+            <Route path="/privacy" element={<Privacy />} />
             <Route path="/live" element={<Live />} />
             <Route path="/analyses/:id" element={<Detail />} />
             <Route path="*" element={<Navigate to="/live" replace />} />
@@ -98,6 +131,7 @@ export default function App() {
           high-impact actions
         </footer>
       </div>
+      </RoleProvider>
     </BrowserRouter>
   )
 }

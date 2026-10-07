@@ -7,7 +7,7 @@ from app.config import get_settings
 from app.db import get_session
 from app.models.schemas import AuditEntryOut, AuditVerifyResult
 from app.models.tables import AuditEntry
-from app.services import audit
+from app.services import audit, workflow
 
 router = APIRouter()
 
@@ -32,6 +32,17 @@ def verify_audit(session: Session = Depends(get_session)):
     valid, broken_at = audit.verify_chain(session)
     count = session.exec(select(func.count()).select_from(AuditEntry)).one()
     return AuditVerifyResult(valid=valid, broken_at=broken_at, entries=count)
+
+
+@router.get("/stats")
+def console_stats(session: Session = Depends(get_session)):
+    return workflow.stats(session)
+
+
+@router.delete("/analyses")
+def purge_all_demo_data(session: Session = Depends(get_session)):
+    """Privacy Center: purge every analysis (hash-only tombstones remain, each purge is audited)."""
+    return {"purged": workflow.purge_all(session)}
 
 
 @router.get("/privacy/manifest")
