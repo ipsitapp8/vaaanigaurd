@@ -4,14 +4,14 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, Response
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 from sqlmodel import Session
 
 from app.config import get_settings
 from app.db import get_session
 from app.models.schemas import AnalysisResponse, AnalysisSummary, CallMetadata, TransactionContext
 from app.models.tables import Analysis
-from app.services import evidence, pipeline, retention, scenarios, workflow
+from app.services import demo_cache, evidence, pipeline, retention, scenarios, workflow
 from app.services.audio_io import AudioError
 
 log = logging.getLogger("vaaniguard.api")
@@ -44,7 +44,11 @@ def run_scenario(scenario_id: str, session: Session = Depends(get_session)):
     if not sc.audio_path.exists():
         raise api_error(500, "scenario_audio_missing", "The bundled audio for this scenario is missing.", "Run scripts/make_placeholder_audio.py or add the file to demo_audio/.")
     audio = sc.audio_path.read_bytes()
-    res = pipeline.run_pipeline(audio, sc.metadata, sc.context, scenario=sc)
+    sha = evidence.sha256_hex(audio)
+    res = demo_cache.replay(sc.id, sha) if demo_cache.enabled() else None
+    if res is None:  # normal path (also when demo-safe is on but no real run is cached yet)
+        res = pipeline.run_pipeline(audio, sc.metadata, sc.context, scenario=sc)
+        demo_cache.save(sc.id, sha, res)
     res = workflow.save_new(session, res, audio, sc.id, retain=False)
     log.info("scenario_run", extra={"fields": {"analysis_id": res.id, "scenario": sc.id, "tier": res.tier, "score": res.score}})
     return res
@@ -120,3 +124,19 @@ def get_report(analysis_id: str, format: str = Query("json", pattern="^(json|htm
     if format == "html":
         return HTMLResponse(evidence.report_html(report))
     return json.loads(evidence.canonical_json(report))
+
+
+class DemoSafe(BaseModel):
+    enabled: bool
+
+
+@router.get("/demo-safe", response_model=DemoSafe)
+def get_demo_safe():
+    return DemoSafe(enabled=demo_cache.enabled())
+
+
+@router.put("/demo-safe", response_model=DemoSafe)
+def set_demo_safe(body: DemoSafe):
+    """Last-resort mode: scenario runs replay the last real result, clearly labelled CACHED."""
+    demo_cache.set_enabled(body.enabled)
+    return DemoSafe(enabled=demo_cache.enabled())

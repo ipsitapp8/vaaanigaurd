@@ -214,6 +214,7 @@ class HealthResponse(BaseModel):
     device: Literal["cpu", "cuda"]
     components: HealthComponents
     force_fallback: bool
+    demo_safe: bool = False
 
 
 class ErrorBody(BaseModel):

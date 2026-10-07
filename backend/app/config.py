@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     force_fallback: bool = False
     # Section G: +-3 threshold jitter per session; off by default for deterministic demos
     hardened_mode: bool = False
+    # Section R: replay labelled results from earlier real runs (initial value; togglable at runtime)
+    demo_safe: bool = False
 
     # Input limits (section E)
     max_audio_bytes: int = 10 * 1024 * 1024

@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from app import __version__
 from app.config import get_settings
 from app.models.schemas import HealthResponse
-from app.services import model_registry
+from app.services import demo_cache, model_registry
 
 router = APIRouter()
 
@@ -15,4 +15,5 @@ def health() -> HealthResponse:
         device=model_registry.get_device(),  # type: ignore[arg-type]
         components=model_registry.health_components(),
         force_fallback=get_settings().force_fallback,
+        demo_safe=demo_cache.enabled(),
     )

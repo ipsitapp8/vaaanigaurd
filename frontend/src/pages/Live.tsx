@@ -201,6 +201,7 @@ export default function Live() {
         </div></Card>
       )}
 
+      {analysis?.components.cache && <p role="status" className="rounded border border-amber-500/50 bg-amber-500/10 p-2 text-sm font-semibold text-amber-200">{analysis.components.cache.note}</p>}
       {analysis && (
         <div className="grid min-w-0 gap-4 lg:grid-cols-[repeat(3,minmax(0,1fr))]">
           <div className="min-w-0 space-y-4">

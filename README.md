@@ -106,6 +106,8 @@ Open http://localhost:5173. The first start downloads the ASR (about 480 MB) and
 
 Settings use the `VG_` prefix (`VG_FORCE_FALLBACK=1`, `VG_DATA_DIR`, `VG_WHISPER_MODEL`, `VG_ASR_THREADS`, `VG_TORCH_THREADS`, ...).
 
+**Demo-safe mode (header toggle, `PUT /api/demo-safe`).** A last resort if a model misbehaves on stage: scenario runs replay the most recent *real* result for that scenario and audio hash, with every signal and component labelled `cached` and a banner "CACHED RESULT from a real run at ...". Only runs where ASR and the voice model were both real are cached, and with nothing cached the real pipeline runs. Nothing is fabricated.
+
 ## Demo scenarios
 
 Fictional entities only (Bharat National Bank, Kaveri Textiles Pvt Ltd). Run from **Live Monitor**.
@@ -142,14 +144,14 @@ Fictional entities only (Bharat National Bank, Kaveri Textiles Pvt Ltd). Run fro
 | Spoofed caller ID | Callback always to the directory number |
 | Evidence tampering | Hash chain, redaction, purge |
 | Replay of real recordings | Out-of-band confirm and callback (a liveness prompt is documented, not built) |
-| Threshold probing | `hardened_jitter` is configured but **not implemented**; a score is never shown to the caller side |
+| Threshold probing | Set `VG_HARDENED_MODE=1`: tier boundaries shift by a random +-3 points, fixed per server session (off by default so demos and tests are deterministic); a score is never shown to the caller side |
 
 ## Limitations
 
 - The voice model is **not validated on Indian telephony audio**. On our placeholder clips it rates everything as real, which is exactly why the system does not trust it alone.
 - Acoustic-heuristic thresholds are uncalibrated; the lexicon is hand-written; no accuracy claims are made.
 - Directory, accounts, call metadata and verification channels are simulated.
-- Speaker similarity, zero-shot intent, true streaming, the what-if panel and red-team mode are not built. Analysis is one server-side pass; the UI replays it in sync with playback.
+- Speaker similarity, zero-shot intent, Docker, true streaming, the what-if panel and red-team mode are not built. Analysis is one server-side pass; the UI replays it in sync with playback.
 - Single-process SQLite; no authentication by design.
 
 ## Model, dataset and AI-content disclosure

@@ -58,6 +58,14 @@ function RoleSwitch() {
   )
 }
 
+function DemoSafeToggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <label className="flex items-center gap-1 text-xs text-slate-400" title="Last resort: replay labelled results from earlier real runs">
+      <input type="checkbox" checked={on} onChange={(e) => onChange(e.target.checked)} /> Demo-safe
+    </label>
+  )
+}
+
 function Header() {
   const [health, setHealth] = useState<HealthResponse | null>(null)
   const [error, setError] = useState(false)
@@ -100,6 +108,7 @@ function Header() {
             <RefreshCw className="h-3 w-3" /> Backend unreachable · retry
           </button>
         )}
+        {health && <DemoSafeToggle on={health.demo_safe} onChange={(v) => api.setDemoSafe(v).then(load).catch(() => setError(true))} />}
         <RoleSwitch />
         <span className="rounded border border-amber-500/50 bg-amber-500/10 px-2 py-0.5 font-mono text-xs font-semibold text-amber-300">
           SYNTHETIC DEMO DATA

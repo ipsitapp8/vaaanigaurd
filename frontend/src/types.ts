@@ -148,6 +148,7 @@ export interface HealthResponse {
     db: ComponentStatus
   }
   force_fallback: boolean
+  demo_safe: boolean
 }
 
 export interface RuleTriggered {

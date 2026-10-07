@@ -77,6 +77,8 @@ const post = (body: unknown): RequestInit => ({
 
 export const api = {
   health: () => request<HealthResponse>('/health'),
+  setDemoSafe: (enabled: boolean) =>
+    request<{ enabled: boolean }>('/demo-safe', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled }) }),
   scenarios: () => request<ScenarioSummary[]>('/scenarios'),
   runScenario: (id: string) => request<AnalysisResponse>(`/scenarios/${id}/run`, { method: 'POST' }),
   upload: (form: FormData) => request<AnalysisResponse>('/analyses', { method: 'POST', body: form }),

@@ -25,7 +25,7 @@ Spec: docs/SPEC.md · Decisions: DECISIONS.md. Work one phase at a time.
 - [ ] Six demo scenarios: JSON + context + tier tests [x]; audio is PLACEHOLDER TTS [ ] (replace with consented recordings, Phase 5)
 - [x] Live Call Monitor, Analysis Detail, Verification panel, Review Queue, Audit Log, Privacy Center, Console
 - [ ] PII redaction [x], in-memory audio (no temp files) [x], hash-chained audit module [x]; SHA-256 evidence, persistence, purge endpoint [x]
-- [ ] Graceful fallbacks (section R): ASR/sidecar/partial analysis/timeouts/malformed audio [x]; detector-unavailable [x], DB fail [x], demo-safe cached mode [ ]
+- [ ] Graceful fallbacks (section R): ASR/sidecar/partial analysis/timeouts/malformed audio [x]; detector-unavailable [x], DB fail [x], demo-safe cached mode [x]
 - [x] pytest suite (fusion, rules, verification, redaction, lexicon, audit, engines, API): 211 tests, run under `VG_FORCE_FALLBACK=1`
 - [x] README
 

@@ -2,9 +2,10 @@
 
 Weights and thresholds come from config/risk.yaml. No I/O, no models.
 """
+import secrets
 from dataclasses import dataclass, field
 
-from app.config import load_risk_config
+from app.config import get_settings, load_risk_config
 from app.models.schemas import RuleTriggered, SignalResult, Tier
 
 TIER_ORDER: list[Tier] = ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
@@ -34,8 +35,31 @@ class FusionResult:
     flags: list[str] = field(default_factory=list)
 
 
+_jitter: dict[str, int] | None = None
+
+
+def reset_jitter() -> None:
+    """Draw new per-session threshold offsets (hardened mode). Tests call this for a clean slate."""
+    global _jitter
+    _jitter = None
+
+
+def _bounds(cfg: dict) -> dict[str, int]:
+    """Tier lower bounds. In hardened mode each boundary shifts by a random +-N points that is fixed for
+    the process lifetime, so a probing attacker cannot learn the exact cut-offs. Off by default so demos
+    and tests are deterministic."""
+    bounds = dict(cfg["tiers"])
+    if not get_settings().hardened_mode:
+        return bounds
+    global _jitter
+    if _jitter is None:
+        n = cfg.get("hardened_jitter", 3)
+        _jitter = {t: (secrets.randbelow(2 * n + 1) - n if t != "LOW" else 0) for t in TIER_ORDER}
+    return {t: bounds[t] + _jitter[t] for t in bounds}
+
+
 def tier_for(score: int, config: dict | None = None) -> Tier:
-    bounds = (config or load_risk_config())["tiers"]
+    bounds = _bounds(config or load_risk_config())
     tier: Tier = "LOW"
     for t in TIER_ORDER:
         if score >= bounds[t]:
@@ -44,7 +68,7 @@ def tier_for(score: int, config: dict | None = None) -> Tier:
 
 
 def tier_min(tier: Tier, config: dict | None = None) -> int:
-    return (config or load_risk_config())["tiers"][tier]
+    return _bounds(config or load_risk_config())[tier]
 
 
 def max_tier(a: Tier, b: Tier) -> Tier:

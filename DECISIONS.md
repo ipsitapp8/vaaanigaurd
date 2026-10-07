@@ -84,3 +84,9 @@
 53. **SHOULD items done:** Customer view (English + Hindi alert card, 1930 line, bank-never-asks-OTP text for the special route), microphone recording (MediaRecorder -> normal upload path; button hidden if unsupported, message if denied), evidence report export (JSON + printable HTML, from Phase 3).
 54. **Double verification bug:** React StrictMode ran the panel's start effect twice and created two pending verifications for one analysis; the panel now starts once per analysis id.
 55. **Demo audio is still placeholder TTS.** I cannot record or clone consenting people's voices from here, so the consented-recording step is NOT done and `make demo-check` with real models still fails scenarios 3 and 4 (#33). Needed from the team: record genuine clips and generate clones with consent, write them to `demo_audio/` and `consent.md`, and re-run `make demo-check`. Not done: Dockerfile, README (Phase 6), demo-safe cached mode, hardened-mode jitter, speaker similarity, zero-shot.
+
+
+## Phase 6 additions (2026-10-07)
+
+56. **Hardened mode implemented** (`VG_HARDENED_MODE=1`): MEDIUM/HIGH/CRITICAL lower bounds shift by a random integer in [-3, 3] (`hardened_jitter`), drawn once per process with `secrets`, applied in `tier_for` and `tier_min` so verification floors stay consistent. LOW stays 0. Rule score floors (R1 85, R2 70) are not jittered.
+57. **Demo-safe mode implemented.** Real runs (ASR and voice both `model`) are written to `data/cache/{scenario}.json` with the audio hash and time; with the toggle on, `POST /scenarios/{id}/run` replays that result under a new id (so verification, review and audit still work), every signal/component source becomes `cached`, and `components.cache` carries "CACHED RESULT from a real run at <time>". No entry or a changed audio hash means the real pipeline runs. The cache is filled by normal runs, so run each scenario once with real models before relying on it.

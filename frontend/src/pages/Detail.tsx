@@ -105,6 +105,7 @@ export default function Detail() {
         </div>
       </div>
 
+      {a.components.cache && <p role="status" className="rounded border border-amber-500/50 bg-amber-500/10 p-2 text-sm font-semibold text-amber-200">{a.components.cache.note}</p>}
       <div className="grid min-w-0 gap-4 lg:grid-cols-[repeat(3,minmax(0,1fr))]">
         <Card title="Risk"><RiskGauge score={a.score} tier={a.tier} />
           <p className="mt-3 text-center text-xs text-slate-500">Coverage {Math.round(a.coverage * 100)}% of signal weight available</p>
